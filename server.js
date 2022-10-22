@@ -5,7 +5,7 @@
 * 
 *  Name: Krish HarshadKumar Student ID: 123898215 Date: 30/09/2022
 *
-*  Cyclic Web App URL: https://nutty-knickers-fox.cyclic.app/about
+*  Cyclic Web App URL: https://nutty-knickers-fox.cyclic.app/
 *
 *  GitHub Repository URL: https://github.com/krishdoesit/web322-app
 *
