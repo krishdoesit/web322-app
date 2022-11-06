@@ -122,4 +122,27 @@ exports.getPostById=(id)=>{
     }
   })
 }
-//
+
+exports.getPublishedPostsByCategory=(category)=>{
+    return new Promise((response,reject)=>{
+        const arrCheck=posts.filter(tc=>tc.published==true && tc.category==category);
+        if(posts.lenght==0){
+            reject("no results returned");
+        }
+        else{
+            resolve(arrCheck);
+            
+        }
+    })
+
+}
+
+// return new Promise((resolve,reject)=>{
+//     const arr1=posts.filter(p=>p.published==true);
+//     if(posts.length==0){
+//      reject('no results returned');
+//     }
+//     else{
+//      resolve(arr1);
+//     }
+
