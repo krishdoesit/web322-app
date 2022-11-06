@@ -1,21 +1,23 @@
 /*********************************************************************************
-*  WEB322 – Assignment 02
-*  I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  No part *  of this assignment has been copied manually or electronically from any other source 
+*  WEB322 – Assignment 04
+*  I declare that this assignment is my own work in accordance with Seneca  Academic Policy.  No part 
+*  of this assignment has been copied manually or electronically from any other source 
 *  (including 3rd party web sites) or distributed to other students.
 * 
-*  Name: Krish HarshadKumar Student ID: 123898215 Date: 30/09/2022
+*  Name: krish Harshadkumar Patel Student ID: 123898215 Date: 2022/11/06
 *
 *  Cyclic Web App URL: https://nutty-knickers-fox.cyclic.app/
-*
+* 
 *  GitHub Repository URL: https://github.com/krishdoesit/web322-app
 *
-********************************************************************************/ 
+********************************************************************************/
+
 
 //var required= require("./blog-service");
-const express=require("express");
 //const { dirname } = require("path");
-const path = require("path");
 //var blogservice=require(__dirname+"/blog-service.js");
+const express=require("express");
+const path = require("path");
 const blogData=require("./blog-service");
 const multer=require("multer");
 const cloudinary = require('cloudinary').v2;
@@ -23,7 +25,7 @@ const streamifier = require('streamifier');
 const stripJs=require('strip-js');
 
 
-
+//cloudinary config//////////////////////////
 cloudinary.config({
     cloud_name:'daiwvaoap',
     api_key:'257675341733921',
@@ -32,25 +34,11 @@ cloudinary.config({
 });
 const upload = multer(); // no { storage: storage } since we are not using disk storage
 
-
-//const { application } = require("express");
-//const { readSync } = require("fs");
-//const { mainModule } = require("process");
 var app=express();
 var PORT=process.env.PORT||8080;
 
-//Handlebars
+//managing Handlebars////////////////////////////////////////////////////////////////////////
 const exphbs = require('express-handlebars');
-app.engine('.hbs', exphbs.engine({ 
-    extname: '.hbs' ,
-    helpers: {
-        safeHTML: function(context){
-            // console.log(stripJs(context));console.log("expected run");
-            return stripJs(context);
-        } 
-    }
-}));
-
 app.set('view engine', '.hbs');
 app.use(function(req,res,next){
     let route = req.path.substring(1);
@@ -59,11 +47,9 @@ app.use(function(req,res,next){
     next();
 });
 
-
 function onHTTPStart(){
     console.log("Express http server listening on "+PORT);
 }
-
 
 app.get('/',(req,res)=>{
     res.redirect('/blog');
@@ -74,6 +60,7 @@ app.get("/about",(req,res)=>{
     res.render("about");
 });
 
+//custom helpers///////////////////////////////////////////
 app.engine('.hbs', exphbs.engine({ 
     extname: '.hbs',
     helpers: { 
@@ -304,7 +291,7 @@ app.get("/posts/:id",(req,res)=>{
 });//working perfectlycd
 
 
-
+//rendering 404 error page
 app.get('*',(req,res)=>{
    res.render("404");
 })
