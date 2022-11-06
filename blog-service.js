@@ -4,6 +4,7 @@ const { doesNotReject } = require("assert");
 const fs=require("fs");
 const { resolve } = require("path");
 
+
 exports.initialize=()=>{
     return new Promise((resolve,reject)=>{
         fs.readFile('./data/posts.json',(err,data)=>{
@@ -65,6 +66,7 @@ exports.getCategories=()=>{
 exports.addPost=(postData)=>{
     postData.published == undefined ? postData.published=false : postData.published=true;
     postData.id=posts.length+1;
+    postData.postDate=new Date().toISOString().split('T',1)[0];
     posts.push(postData);
    // resolve(posts);
     return new Promise((resolve,reject)=>{
@@ -124,25 +126,17 @@ exports.getPostById=(id)=>{
 }
 
 exports.getPublishedPostsByCategory=(category)=>{
-    return new Promise((response,reject)=>{
+    return new Promise((resolve,reject)=>{
         const arrCheck=posts.filter(tc=>tc.published==true && tc.category==category);
         if(posts.lenght==0){
             reject("no results returned");
         }
         else{
             resolve(arrCheck);
-            
+
         }
     })
 
 }
 
-// return new Promise((resolve,reject)=>{
-//     const arr1=posts.filter(p=>p.published==true);
-//     if(posts.length==0){
-//      reject('no results returned');
-//     }
-//     else{
-//      resolve(arr1);
-//     }
 

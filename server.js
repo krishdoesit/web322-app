@@ -11,15 +11,16 @@
 *
 ********************************************************************************/ 
 
-var required= require("./blog-service");
+//var required= require("./blog-service");
 const express=require("express");
-const { dirname } = require("path");
+//const { dirname } = require("path");
 const path = require("path");
-var blogservice=require(__dirname+"/blog-service.js");
+//var blogservice=require(__dirname+"/blog-service.js");
 const blogData=require("./blog-service");
 const multer=require("multer");
 const cloudinary = require('cloudinary').v2;
 const streamifier = require('streamifier');
+const stripJs=require('strip-js');
 
 
 
@@ -32,15 +33,24 @@ cloudinary.config({
 const upload = multer(); // no { storage: storage } since we are not using disk storage
 
 
-const { application } = require("express");
-const { readSync } = require("fs");
-const { mainModule } = require("process");
+//const { application } = require("express");
+//const { readSync } = require("fs");
+//const { mainModule } = require("process");
 var app=express();
 var PORT=process.env.PORT||8080;
 
 //Handlebars
 const exphbs = require('express-handlebars');
-app.engine('.hbs', exphbs.engine({ extname: '.hbs' }));
+app.engine('.hbs', exphbs.engine({ 
+    extname: '.hbs' ,
+    helpers: {
+        safeHTML: function(context){
+            // console.log(stripJs(context));console.log("expected run");
+            return stripJs(context);
+        } 
+    }
+}));
+
 app.set('view engine', '.hbs');
 app.use(function(req,res,next){
     let route = req.path.substring(1);
@@ -49,19 +59,6 @@ app.use(function(req,res,next){
     next();
 });
 
-//strip-js
-const stripJs=require('strip-js');
-//custom helper
-app.engine('.hbs',exphbs.engine({
-    extaname:'.hbs',
-    helpers:{
-        safeHTML: function(context){
-            console.log(stripJs(context));console.log("expected run");
-            return stripJs(context);
-        }
-        
-    }
-}));
 
 function onHTTPStart(){
     console.log("Express http server listening on "+PORT);
@@ -69,7 +66,7 @@ function onHTTPStart(){
 
 
 app.get('/',(req,res)=>{
-    res.redirect('/about');
+    res.redirect('/blog');
 })
 
 app.use(express.static("views"));
@@ -80,6 +77,9 @@ app.get("/about",(req,res)=>{
 app.engine('.hbs', exphbs.engine({ 
     extname: '.hbs',
     helpers: { 
+        safeHTML: function(context) {
+            return stripJs(context)
+        },
         navLink: function(url, options){
             return '<li' + 
                 ((url == app.locals.activeRoute) ? ' class="active" ' : '') + 
@@ -99,31 +99,27 @@ app.engine('.hbs', exphbs.engine({
 
 app.use(express.static('public'));
 
-// app.get('/blog',(req,res)=>{
-//     blogservice.getPublishedPosts().then((data)=>{
-//         res.json({data});
-//     }).catch((err)=>{
-//         res.json({"message":err})
-//     })
-// });
 app.get('/blog', async (req, res) => {
 
     // Declare an object to store properties for the view
     let viewData = {};
 
     try{
+        
 
         // declare empty array to hold "post" objects
         let posts = [];
 
         // if there's a "category" query, filter the returned posts by category
         if(req.query.category){
+            
             // Obtain the published "posts" by category
             posts = await blogData.getPublishedPostsByCategory(req.query.category);
         }else{
             // Obtain the published "posts"
             posts = await blogData.getPublishedPosts();
         }
+        
 
         // sort the published posts by postDate
         posts.sort((a,b) => new Date(b.postDate) - new Date(a.postDate));
@@ -208,7 +204,7 @@ app.get('/blog/:id', async (req, res) => {
 
 app.get('/posts',(req,res)=>{
     if(req.query.category){//query /posts?category
-        blogservice.getPostsByCategory(req.query.category).then((categoryId)=>{
+        blogData.getPostsByCategory(req.query.category).then((categoryId)=>{
             res.render("posts",{posts:categoryId});
          //res.json({categoryId})
         }).catch((err)=>{
@@ -216,14 +212,14 @@ app.get('/posts',(req,res)=>{
         })
     }
     else if(req.query.minDate){//query /posts?minDate
-        blogservice.getPostsByMinDate(req.query.minDate).then((databydate)=>{
+        blogData.getPostsByMinDate(req.query.minDate).then((databydate)=>{
             res.json({databydate})
         }).catch((err)=>{
             res.json({message:"error"});
         })
     }
     else{
-        blogservice.getAllPosts().then((data)=>{
+        blogData.getAllPosts().then((data)=>{
             //res.json({data});
             res.render("posts",{posts:data}); 
         }).catch((err)=>{
@@ -235,7 +231,7 @@ app.get('/posts',(req,res)=>{
 
 
 app.get('/posts',(req,res)=>{
-    blogservice.getAllPosts().then((data)=>{
+    blogData.getAllPosts().then((data)=>{
        res.render("posts",{posts:data});   
     }).catch((err)=>{
        res.render("posts",{message:"no results"});
@@ -243,7 +239,7 @@ app.get('/posts',(req,res)=>{
 });
 
 app.get('/categories',(req,res)=>{
-    blogservice.getCategories().then((data)=>{
+    blogData.getCategories().then((data)=>{
         //res.json({data});
         res.render("categories",{categories:data})
     }).catch((err)=>{
@@ -288,7 +284,7 @@ app.post('/posts/add',upload.single("featureImage"),(req,res)=>{
      
     function processPost(imageUrl){
         req.body.featureImage = imageUrl;
-        blogservice.addPost(req.body).then(()=>{
+        blogData.addPost(req.body).then(()=>{
         res.redirect("/posts");
         })
     
@@ -300,7 +296,7 @@ app.post('/posts/add',upload.single("featureImage"),(req,res)=>{
 
 
 app.get("/posts/:id",(req,res)=>{
-    blogservice.getPostById(req.params.id).then((data)=>{
+    blogData.getPostById(req.params.id).then((data)=>{
         res.json({data});
     }).catch((err)=>{
         res.json({message:err});
@@ -310,10 +306,10 @@ app.get("/posts/:id",(req,res)=>{
 
 
 app.get('*',(req,res)=>{
-    res.status(404).send("Page Not Found");
+   res.render("404");
 })
 
-blogservice.initialize().then(()=>{
+blogData.initialize().then(()=>{
     app.listen(PORT,onHTTPStart());
 }).catch(()=>{
  console.log("unable to read file");
