@@ -222,9 +222,6 @@ app.get('/posts', (req, res) => {
                 res.render("posts", { message: "no results" });
             }
         })
-        // .catch((err)=>{
-        //     res.render("posts",{message:"no results"});
-        // })
     }
 });
 
@@ -237,9 +234,6 @@ app.get('/posts', (req, res) => {
             res.render("posts", { message: "no results" });
         }
     })
-    // .catch((err)=>{
-    //    res.render("posts",{message:"no results"});
-    // })
 });
 
 app.get('/categories', (req, res) => {
@@ -251,9 +245,6 @@ app.get('/categories', (req, res) => {
             res.render("categories",{message:"no results"})
         }
     })
-    // .catch((err) => {
-    //     res.json({ "message": err })
-    // })
 });
 
 app.get("/categories/add",(req,res)=>{

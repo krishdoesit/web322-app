@@ -169,17 +169,6 @@ exports.deletePostById = id => {
     })
 };
 
-// exports.deletePostById=id=>{
-//     return new Promise((resolve,reject)=>{
-//         Post.destroy({
-//             where:{
-//                 id:id
-//             }
-//         })
-//         .then(resolve())
-//         .catch(reject("unable to delete post"))
-//     })
-// };
 
 exports.getPostsByMinDate = () => {
     return new Promise((resolve, reject) => {
