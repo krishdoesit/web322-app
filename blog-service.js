@@ -72,14 +72,14 @@ exports.getCategories = () => {
 
 exports.addPost = (postData) => {
     return new Promise((resolve, reject) => {
-        
+
         for (var i in postData) {
             if (postData[i] == "") {
                 postData[i] = null;
-            }            
+            }
         }
         postData.published = (postData.published) ? true : false;
-        postData.postDate=new Date();
+        postData.postDate = new Date();
 
         Post.create(postData)
             .then(resolve(Post.findAll()))
@@ -94,8 +94,8 @@ exports.getPostsByCategory = (postcatId) => {
                 category: postcatId
             }
         })
-        .then(resolve(Post.findAll({ where: { category: postcatId } })))
-        .catch(reject("no results returned"));
+            .then(resolve(Post.findAll({ where: { category: postcatId } })))
+            .catch(reject("no results returned"));
     })
 };
 
