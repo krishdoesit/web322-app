@@ -1,20 +1,18 @@
 //krish
 const bcrypt = require("bcryptjs");
-var mongoose=require("mongoose");
-//const mongoose=require("mongoose");
+var mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-
-var userSchema=new Schema({
-    "userName":{
-        "type":String,
-        "unique":true
+var userSchema = new Schema({
+    "userName": {
+        "type": String,
+        "unique": true
     },
-    "password":String,
-    "email":String,
-    "loginHistory":[{
-        "dateTime":Date,
-        "userAgent":String
+    "password": String,
+    "email": String,
+    "loginHistory": [{
+        "dateTime": Date,
+        "userAgent": String
     }]
 });
 
@@ -22,14 +20,14 @@ let User; // to be defined on new connection
 
 module.exports.initialize = function () {
     return new Promise(function (resolve, reject) {
-        let db = mongoose.createConnection("mongodb+srv://krish2002:krish2002@cluster0.nu2ttab.mongodb.net/?retryWrites=true&w=majority",{ useNewUrlParser: true, useUnifiedTopology: true} );
+        let db = mongoose.createConnection("mongodb+srv://krish2002:krish2002@cluster0.nu2ttab.mongodb.net/?retryWrites=true&w=majority", { useNewUrlParser: true, useUnifiedTopology: true });
 
-        db.on('error', (err)=>{
+        db.on('error', (err) => {
             reject(err); // reject the promise with the provided error
         });
-        db.once('open', ()=>{
-           User = db.model("users", userSchema);
-           resolve();
+        db.once('open', () => {
+            User = db.model("users", userSchema);
+            resolve();
         });
     });
 };
@@ -40,10 +38,9 @@ exports.registerUser = (userData) => {
             reject("Passwords do not match");
         }
         else {
-            bcrypt.genSalt(10, function(err, salt) {
-                bcrypt.hash(userData.password, salt, function(err, hash) {
-                    if (err) 
-                    {
+            bcrypt.genSalt(10, function (err, salt) {
+                bcrypt.hash(userData.password, salt, function (err, hash) {
+                    if (err) {
                         reject("error encrypting password");
                     }
                     else {
@@ -70,32 +67,31 @@ exports.registerUser = (userData) => {
 };
 
 
-exports.checkUser=(userData)=>{
-    return new Promise((resolve,reject)=>{
-        User.find({userName:userData.userName})
-        .exec()
-        .then(users=>{
-            bcrypt.compare(userData.password,users[0].password)
-            .then(res=>{
-                if(res===true)
-                {
-                    users[0].loginHistory.push({dateTime:(new Date()).toString(),userAgent:userData.userAgent});
-                    User.update(
-                        {userName:users[0].userName},
-                        {$set:{loginHistory:users[0].loginHistory}},
+exports.checkUser = (userData) => {
+    return new Promise((resolve, reject) => {
+        User.find({ userName: userData.userName })
+            .exec()
+            .then(users => {
+                bcrypt.compare(userData.password, users[0].password)
+                    .then(res => {
+                        if (res === true) {
+                            users[0].loginHistory.push({ dateTime: (new Date()).toString(), userAgent: userData.userAgent });
+                            User.update(
+                                { userName: users[0].userName },
+                                { $set: { loginHistory: users[0].loginHistory } },
 
-                    )
-                    .exec()
-                    .then(() => {resolve(users[0])})
-                    .catch(err => {reject("There was an error verifying the user: " + err)})
-                }
-                else {
-                    reject("Incorrect Password for user: " + userData.userName); 
-                }
+                            )
+                                .exec()
+                                .then(() => { resolve(users[0]) })
+                                .catch(err => { reject("There was an error verifying the user: " + err) })
+                        }
+                        else {
+                            reject("Incorrect Password for user: " + userData.userName);
+                        }
+                    })
             })
-        })
-        .catch(()=>{
-            reject("unable to find user: "+userData.userName);
-        })
+            .catch(() => {
+                reject("unable to find user: " + userData.userName);
+            })
     })
 };
